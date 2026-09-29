@@ -155,6 +155,7 @@ function renderCart() {
 
 function setCartOpen(open) {
   if (open) setCartOpen.returnFocus = document.activeElement;
+  if (open) setMobileMenu(false);
   cartDrawer.classList.toggle('open', open);
   cartDrawer.setAttribute('aria-hidden', String(!open));
   cartPanel.inert = !open;
@@ -340,6 +341,23 @@ renderCart();
 observeReveals();
 
 const header = document.querySelector('.topbar');
+const menuToggle = document.querySelector('#menuToggle');
+const mainNav = document.querySelector('#mainNav');
+function setMobileMenu(open) {
+  header.classList.toggle('menu-open', open);
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+}
+menuToggle.addEventListener('click', () => setMobileMenu(menuToggle.getAttribute('aria-expanded') !== 'true'));
+mainNav.addEventListener('click', e => { if (e.target.closest('a')) setMobileMenu(false); });
+document.addEventListener('click', e => { if (!header.contains(e.target)) setMobileMenu(false); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+    setMobileMenu(false);
+    menuToggle.focus();
+  }
+});
+window.addEventListener('resize', () => { if (innerWidth > 800) setMobileMenu(false); });
 const manifesto = document.querySelector('.manifesto');
 let scrollFrame = 0;
 function updateScrollScene() {

@@ -6,7 +6,11 @@
   <meta name="theme-color" content="#1a0d0a" />
   <meta name="description" content="Nuckies — cookies artesanais estilo Nova York. Escolha seus sabores favoritos e monte seu pedido." />
   <title>Nuckies — Cookies artesanais estilo NY</title>
-  <link rel="icon" type="image/svg+xml" sizes="any" href="assets/nuckies-logo.svg" />
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/svg+xml" href="assets/nuckies-logo.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Cormorant+Garamond:ital,wght@1,600&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -24,7 +28,11 @@
       </span>
     </a>
 
-    <nav class="nav" aria-label="Navegação principal">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu" aria-controls="mainNav" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+    </button>
+
+    <nav class="nav" id="mainNav" aria-label="Navegação principal">
       <a href="#destaques">Destaques</a>
       <a href="#sabores">Sabores</a>
       <a href="#experiencia">Experiência</a>
@@ -32,6 +40,7 @@
     </nav>
 
     <button class="cart-pill" id="cartOpen" type="button" aria-label="Abrir pedido">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 10.5a2 2 0 0 0 2 1.5H19l2-9H6" /><circle cx="10" cy="20" r="1" /><circle cx="18" cy="20" r="1" /></svg>
       <span>Meu pedido</span>
       <strong id="cartCount">0</strong>
     </button>
@@ -113,7 +122,7 @@
 
       <div class="menu-toolbar reveal">
         <label class="search-box">
-          <span aria-hidden="true">⌕</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
           <span class="sr-only">Buscar por sabor ou ingrediente</span>
           <input id="searchInput" type="search" placeholder="Buscar por sabor ou ingrediente..." autocomplete="off" />
         </label>

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -143,10 +143,47 @@ try {
   }))` });
   assert.equal(new Set(photos.result.value.map(photo => photo.src)).size, 13);
   assert.ok(photos.result.value.every(photo => photo.loaded), 'foto de sabor não carregou');
-  for (const width of [390, 768, 1440]) {
+  for (const width of [320, 360, 390, 600, 768, 800, 801, 1024, 1440]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height:900, deviceScaleFactor:1, mobile:width < 800 });
-    const layout = await send('Runtime.evaluate', { returnByValue:true, expression:'({ viewport:innerWidth, page:document.documentElement.scrollWidth })' });
+    const layout = await send('Runtime.evaluate', { returnByValue:true, expression:`(() => ({
+      viewport:innerWidth, page:document.documentElement.scrollWidth,
+      clipped:[...document.querySelectorAll('h1,h2,h3,.hero-meta,.product-topline')]
+        .filter(el => el.scrollWidth > el.clientWidth + 1)
+        .map(el => el.closest('.product-card')?.dataset.id || el.className || el.tagName)
+    }))()` });
     assert.ok(layout.result.value.page <= layout.result.value.viewport + 1, 'overflow horizontal em ' + width + 'px: ' + JSON.stringify(layout.result.value));
+    assert.deepEqual(layout.result.value.clipped, [], 'texto cortado em ' + width + 'px');
+  }
+  await send('Emulation.setDeviceMetricsOverride', { width:320, height:568, deviceScaleFactor:1, mobile:true });
+  const mobile = await send('Runtime.evaluate', { returnByValue:true, expression:`(() => {
+    const toggle = document.querySelector('#menuToggle');
+    toggle.click();
+    const menuOpen = toggle.getAttribute('aria-expanded') === 'true' && getComputedStyle(document.querySelector('#mainNav')).visibility === 'visible';
+    document.querySelector('#mainNav a[href="#sabores"]').click();
+    const menuClosed = toggle.getAttribute('aria-expanded') === 'false';
+    const clippedProducts = [];
+    for (const product of products) {
+      openModal(product);
+      const title = document.querySelector('#modalName');
+      if (title.scrollWidth > title.clientWidth + 1) clippedProducts.push(product.id);
+      modal.close();
+    }
+    openModal(products[0]);
+    const dialogFits = modal.getBoundingClientRect().height <= innerHeight;
+    modal.scrollTop = modal.scrollHeight;
+    const close = modal.querySelector('.modal-close').getBoundingClientRect();
+    const closeVisible = close.top >= 0 && close.bottom <= innerHeight;
+    modal.close();
+    document.querySelector('#cartOpen').click();
+    const panelFits = cartPanel.getBoundingClientRect().width <= innerWidth;
+    const touchTarget = cartPanel.querySelector('.qty button').getBoundingClientRect().height;
+    setCartOpen(false);
+    return { menuOpen, menuClosed, clippedProducts, dialogFits, closeVisible, panelFits, touchTarget };
+  })()` });
+  assert.deepEqual(mobile.result.value, { menuOpen:true, menuClosed:true, clippedProducts:[], dialogFits:true, closeVisible:true, panelFits:true, touchTarget:44 });
+  assert.equal(readFileSync('favicon.ico').readUInt16LE(2), 1);
+  for (const path of ['assets/favicon-32.png','assets/apple-touch-icon.png','assets/icon-192.png','assets/icon-512.png']) {
+    assert.equal(readFileSync(path).subarray(0,8).toString('hex'), '89504e470d0a1a0a');
   }
   console.log('OK: catálogo, busca, filtros, modal, carrinho, WhatsApp e responsividade');
   socket.close();
